@@ -1,0 +1,5 @@
+/* Dashboard-specific hooks. The shared product shell lives in app-shell.css. */
+
+#subjects-title + #subjects {
+  margin-bottom: 2px;
+}

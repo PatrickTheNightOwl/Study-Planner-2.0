@@ -1,0 +1,39 @@
+/* Task-management-specific hooks. The shared product shell lives in app-shell.css. */
+
+#task-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+}
+
+#task-search {
+  width: min(100%, 240px);
+  min-height: 46px;
+  padding: 0 13px;
+  border: 1px solid #d5dce7;
+  border-radius: 11px;
+  outline: 0;
+  background: #ffffff;
+  color: var(--ink);
+  font-size: 0.9rem;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+#task-search::placeholder {
+  color: #9aa5b5;
+}
+
+#task-search:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(255, 107, 74, 0.13);
+}
+
+@media (max-width: 560px) {
+  #task-header-actions,
+  #task-search {
+    width: 100%;
+  }
+}

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#15233b" />
+    <title>AI Planner | Study Planner</title>
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="../Assets/favicon.png"
+    />
+    <link rel="stylesheet" href="../CSS/app-shell.css?v=3" />
+    <link rel="stylesheet" href="../CSS/ai-planner-style.css?v=1" />
+  </head>
+  <body>
+    <nav id="sidebar" aria-label="Main navigation">
+      <div id="brand">
+        <img src="../Assets/icon.png" alt="" class="website-logo" />
+        <a href="index.html" id="website-name">Study Planner</a>
+      </div>
+
+      <ul id="nav-list">
+        <li class="nav-item">
+          <a href="dashboard.html" class="nav-link"
+            ><span class="nav-icon" aria-hidden="true">&#9638;</span
+            ><span>Dashboard</span></a
+          >
+        </li>
+        <li class="nav-item">
+          <a href="subject-management.html" class="nav-link"
+            ><span class="nav-icon" aria-hidden="true">&#9635;</span
+            ><span>Subjects</span></a
+          >
+        </li>
+        <li class="nav-item">
+          <a href="task-management.html" class="nav-link"
+            ><span class="nav-icon" aria-hidden="true">&#10003;</span
+            ><span>Tasks</span></a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            href="ai-planner2.html"
+            class="nav-link active"
+            aria-current="page"
+            ><span class="nav-icon" aria-hidden="true">&#129302;</span
+            ><span>AI Planner</span></a
+          >
+        </li>
+        <li class="nav-item">
+          <a href="settings.html" class="nav-link"
+            ><span class="nav-icon" aria-hidden="true">&#9881;</span
+            ><span>Settings</span></a
+          >
+        </li>
+      </ul>
+    </nav>
+
+    <main id="main-content">
+      <header id="top">
+        <div id="page-title">
+          <h1>AI Planner</h1>
+          <p>
+            Describe your week. Review the draft. Approve to add it.
+          </p>
+        </div>
+      </header>
+
+      <section id="ai-workspace" aria-label="AI planner workspace">
+        <section id="ai-composer" aria-label="Plan brief">
+          <p class="ai-kicker">Brief</p>
+          <h2>Tell the planner what you need</h2>
+          <p class="ai-help">
+            Include subjects, available hours, and any deadlines. You will
+            review the draft before anything is added.
+          </p>
+
+          <label class="visually-hidden" for="ai-prompt">Plan brief</label>
+          <textarea
+            id="ai-prompt"
+            name="ai-prompt"
+            rows="6"
+            placeholder="Example: I have Calculus and History. I can study 2 hours on weeknights and 4 hours on Saturday. Midterm is Friday."
+          ></textarea>
+
+          <div class="ai-chips" role="group" aria-label="Quick prompts">
+            <button type="button" class="ai-chip">Exam week</button>
+            <button type="button" class="ai-chip">Light load</button>
+            <button type="button" class="ai-chip">Catch up</button>
+          </div>
+
+          <button id="generate-plan-btn" type="button">Generate plan</button>
+
+          <div id="ai-thread" aria-live="polite">
+            <p class="ai-thread-empty">
+              No draft yet. Write a brief and generate a plan to start a
+              conversation here.
+            </p>
+            <article class="ai-message ai-message-user">
+              <h3>You</h3>
+              <p>
+                Plan an exam week for Calculus and History. Two hours on
+                weeknights, four on Saturday.
+              </p>
+            </article>
+            <article class="ai-message ai-message-assistant">
+              <h3>Planner</h3>
+              <p>Draft ready. Review the proposed subjects and tasks, then approve.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="ai-preview" aria-label="Proposed plan">
+          <div id="ai-preview-bar">
+            <div id="ai-preview-heading">
+              <h2>Proposed changes</h2>
+              <p>2 subjects · 5 tasks</p>
+            </div>
+            <button id="approve-plan-btn" type="button">Yes, do it</button>
+          </div>
+
+          <div id="ai-preview-body">
+            <p class="no-task-notification ai-preview-empty">
+              Generate a plan to preview subjects and tasks here.
+            </p>
+
+            <section id="proposed-subjects" aria-label="Proposed subjects">
+              <h3 class="ai-preview-label">Subjects</h3>
+              <div id="subjects">
+                <article
+                  class="subject-card"
+                  style="--subject-color: #3b82f6"
+                >
+                  <h3>Calculus</h3>
+                  <p>3 remaining tasks</p>
+                </article>
+                <article
+                  class="subject-card"
+                  style="--subject-color: #8b5cf6"
+                >
+                  <h3>History</h3>
+                  <p>2 remaining tasks</p>
+                </article>
+              </div>
+            </section>
+
+            <section id="proposed-tasks" aria-label="Proposed tasks">
+              <h3 class="ai-preview-label">Tasks</h3>
+              <div id="tasks">
+                <article class="task-card priority-high">
+                  <div class="task-info">
+                    <p class="task-title">Review derivatives</p>
+                    <p class="task-deadline">Monday · 2 hours</p>
+                  </div>
+                </article>
+                <article class="task-card priority-medium">
+                  <div class="task-info">
+                    <p class="task-title">Practice integrals</p>
+                    <p class="task-deadline">Wednesday · 2 hours</p>
+                  </div>
+                </article>
+                <article class="task-card priority-high">
+                  <div class="task-info">
+                    <p class="task-title">Outline essay sources</p>
+                    <p class="task-deadline">Tuesday · 2 hours</p>
+                  </div>
+                </article>
+                <article class="task-card priority-medium">
+                  <div class="task-info">
+                    <p class="task-title">Timed practice exam</p>
+                    <p class="task-deadline">Thursday · 2 hours</p>
+                  </div>
+                </article>
+                <article class="task-card priority-low">
+                  <div class="task-info">
+                    <p class="task-title">History timeline recap</p>
+                    <p class="task-deadline">Saturday · 4 hours</p>
+                  </div>
+                </article>
+              </div>
+            </section>
+          </div>
+        </section>
+      </section>
+    </main>
+  </body>
+</html>

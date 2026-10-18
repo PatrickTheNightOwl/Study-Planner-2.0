@@ -5,8 +5,7 @@
 const signUpForm = document.getElementById("form");
 const inputEmail = document.getElementById("input-email");
 const inputPassword = document.getElementById("input-password");
-const database = JSON.parse(localStorage.getItem("studyPlannerDatabase"));
-
+const userColl = db.collection("users");
 //Function
 function emailFilter(email) {
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -18,10 +17,6 @@ function emailFilter(email) {
 
   if (!emailPattern.test(email)) {
     return "Please enter a valid email!";
-  }
-  const existedUser = database.users.some((user) => user.email === email);
-  if (existedUser) {
-    return "Email already exists!";
   }
   return true;
 }
@@ -57,7 +52,6 @@ function passwordFilter(password) {
 }
 // Functions and Events
 signUpForm.addEventListener("submit", function (event) {
-  console.log("submit fired");
   event.preventDefault();
 
   const email = inputEmail.value;
@@ -74,23 +68,24 @@ signUpForm.addEventListener("submit", function (event) {
     alert(passwordCheck);
     return;
   } else {
-    let userId;
-    if (database.users.length === 0) {
-      userId = 1;
-    } else {
-      userId = database.users[database.users.length - 1].id + 1;
-    }
-    const newData = {
-      id: userId,
-      email: email,
-      password: password,
-      subjects: [],
-      tasks: [],
-    };
-
-    database.users.push(newData);
-    localStorage.setItem("studyPlannerDatabase", JSON.stringify(database));
-    const loginPage = "../HTML/authentication-login.html";
-    window.location.replace(loginPage);
+    auth
+      .createUserWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        userColl.doc(user.uid).set({
+          email: user.email,
+          subjects: [],
+          tasks: [],
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+      })
+      .then(() => {
+        alert("Signing up succeeded");
+        const loginPage = "../HTML/authentication-login.html";
+        window.location.replace(loginPage);
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
   }
 });

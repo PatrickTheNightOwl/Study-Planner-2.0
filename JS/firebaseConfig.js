@@ -11,4 +11,5 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
-const db = firebaes.firestore();
+const db = firebase.firestore();
+const userId = null;

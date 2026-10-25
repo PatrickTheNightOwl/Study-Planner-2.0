@@ -1,14 +1,3 @@
-const database = JSON.parse(localStorage.getItem("studyPlannerDatabase")) || {
-  users: [],
-};
-const currentUserId = Number(localStorage.getItem("currentUserId"));
-const currentUser = database.users.find((user) => user.id === currentUserId);
-
-if (!currentUser) {
-  window.location.replace("authentication-login.html");
-  throw new Error("A signed-in user is required to manage subjects.");
-}
-
 const subjectsList = currentUser.subjects || [];
 const tasksList = currentUser.tasks || [];
 
@@ -53,7 +42,9 @@ function renderSubjects() {
           subject.color
         )}">
           <h3>${escapeHTML(subject.name)}</h3>
-          <p>${remainingTasks} task${remainingTasks !== 1 ? "s" : ""} remaining</p>
+          <p>${remainingTasks} task${
+        remainingTasks !== 1 ? "s" : ""
+      } remaining</p>
         </article>
       `;
     })
@@ -68,7 +59,10 @@ function resetForm() {
   subjectNameInput.value = "";
   selectedColor = "#9ca3af";
   colorContainer.querySelectorAll(".color").forEach((color) => {
-    color.classList.toggle("selected", color.dataset.color.toLowerCase() === selectedColor);
+    color.classList.toggle(
+      "selected",
+      color.dataset.color.toLowerCase() === selectedColor
+    );
   });
 }
 

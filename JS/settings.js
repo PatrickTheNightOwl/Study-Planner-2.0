@@ -1,15 +1,3 @@
-// Data Retrieve
-const database = JSON.parse(localStorage.getItem("studyPlannerDatabase")) || {
-  users: [],
-};
-const currentUserId = Number(localStorage.getItem("currentUserId"));
-const currentUser = database.users.find((user) => user.id === currentUserId);
-
-if (!currentUser) {
-  window.location.replace("authentication-login.html");
-  throw new Error("A signed-in user is required to view settings.");
-}
-
 // Elements Retrieve
 const currentEmail = document.getElementById("current-email");
 const changeEmailButton = document.getElementById("change-email-btn");

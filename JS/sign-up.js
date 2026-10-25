@@ -5,6 +5,7 @@
 const signUpForm = document.getElementById("form");
 const inputEmail = document.getElementById("input-email");
 const inputPassword = document.getElementById("input-password");
+const switchShowHide = document.getElementById("hidden-switch");
 const userColl = db.collection("users");
 //Function
 function emailFilter(email) {
@@ -87,5 +88,18 @@ signUpForm.addEventListener("submit", function (event) {
       .catch((error) => {
         alert(error.message);
       });
+  }
+});
+switchShowHide.addEventListener("click", () => {
+  if (switchShowHide.getAttribute("mode") == "off") {
+    switchShowHide.style.backgroundImage =
+      "url('../Assets/hide-password-button.jpg')";
+    switchShowHide.setAttribute("mode", "on");
+    inputPassword.setAttribute("type", "text");
+  } else {
+    switchShowHide.style.backgroundImage =
+      "url('../Assets/show-password-button.jpg')";
+    switchShowHide.setAttribute("mode", "off");
+    inputPassword.setAttribute("type", "password");
   }
 });

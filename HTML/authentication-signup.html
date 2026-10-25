@@ -43,13 +43,16 @@
           />
 
           <label for="input-password">Password</label>
-          <input
-            type="password"
-            placeholder="Create a password"
-            id="input-password"
-            autocomplete="new-password"
-            required
-          />
+          <div id="password-container">
+            <input
+              type="password"
+              placeholder="Your password"
+              id="input-password"
+              autocomplete="current-password"
+              required
+            />
+            <button id="hidden-switch" mode="off" type="button"></button>
+          </div>
 
           <div id="signup">
             <button id="btn" type="submit">Create Account</button>

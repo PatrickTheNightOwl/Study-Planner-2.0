@@ -58,7 +58,11 @@ input:focus-visible {
   z-index: 0;
   inset: 0 50% 0 0;
   content: "";
-  background: linear-gradient(150deg, rgba(21, 35, 59, 0.92), rgba(30, 51, 83, 0.86)),
+  background: linear-gradient(
+      150deg,
+      rgba(21, 35, 59, 0.92),
+      rgba(30, 51, 83, 0.86)
+    ),
     url("../Assets/hero-section-background.png") center / cover;
 }
 
@@ -287,4 +291,33 @@ input:focus-visible {
   *::after {
     transition-duration: 0.01ms !important;
   }
+}
+#password-container {
+  position: relative;
+  width: 100%;
+}
+#hidden-switch {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+
+  height: 24px; /* Chiều cao tùy chỉnh */
+  width: 40px;
+
+  padding: 0;
+  border: none;
+  background-color: white;
+  cursor: pointer;
+
+  background-image: url("../Assets/show-password-button.jpg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin-right: 10px;
+}
+#input-password {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 60px 12px 12px;
 }

@@ -1,14 +1,3 @@
-const database = JSON.parse(localStorage.getItem("studyPlannerDatabase")) || {
-  users: [],
-};
-const currentUserId = Number(localStorage.getItem("currentUserId"));
-const currentUser = database.users.find((user) => user.id === currentUserId);
-
-if (!currentUser) {
-  window.location.replace("authentication-login.html");
-  throw new Error("A signed-in user is required to manage tasks.");
-}
-
 const subjectsList = currentUser.subjects || [];
 const tasksList = currentUser.tasks || [];
 
@@ -64,12 +53,14 @@ function renderSubjectOptions() {
 function createTaskCard(task) {
   const taskName = escapeHTML(task.task);
   return `
-    <article class="task-card priority-${escapeHTML(task.priority)}" data-task="${taskName}">
+    <article class="task-card priority-${escapeHTML(
+      task.priority
+    )}" data-task="${taskName}">
       <div class="task-info">
         <h3 class="task-title">${taskName}</h3>
-        <p class="task-deadline">Deadline: ${formatDate(task.deadlineDate)}, ${escapeHTML(
-          task.deadlineTime
-        )}</p>
+        <p class="task-deadline">Deadline: ${formatDate(
+          task.deadlineDate
+        )}, ${escapeHTML(task.deadlineTime)}</p>
       </div>
       <input type="checkbox" class="complete-task-checkbox" aria-label="Mark ${taskName} as complete" />
     </article>

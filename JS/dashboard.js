@@ -1,15 +1,3 @@
-const database = JSON.parse(localStorage.getItem("studyPlannerDatabase")) || {
-  users: [],
-};
-
-const currentUserId = Number(localStorage.getItem("currentUserId"));
-const currentUser = database.users.find((user) => user.id === currentUserId);
-
-if (!currentUser) {
-  window.location.replace("authentication-login.html");
-  throw new Error("A signed-in user is required to view the dashboard.");
-}
-
 const subjectsList = currentUser.subjects || [];
 const tasksList = currentUser.tasks || [];
 

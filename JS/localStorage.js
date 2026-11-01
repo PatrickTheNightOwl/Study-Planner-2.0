@@ -1,6 +1,6 @@
 // database.js
 
-const DATABASE_KEY = "studyPlannerDatabase";
+const DATABASE_KEY = "studyPlannerCurrentSession";
 
 function initializeDatabase() {
   const existingDatabase = localStorage.getItem(DATABASE_KEY);

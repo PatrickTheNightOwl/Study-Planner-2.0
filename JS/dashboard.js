@@ -1,5 +1,7 @@
-const subjectsList = currentUser.subjects || [];
-const tasksList = currentUser.tasks || [];
+// currentUser chưa được định nghĩa ở đâu cả -> tránh ReferenceError làm dừng cả file
+const userData = typeof currentUser !== "undefined" ? currentUser : {};
+const subjectsList = userData.subjects || [];
+const tasksList = userData.tasks || [];
 
 const holidaysContainer = document.getElementById("holiday");
 const subjectsTitle = document.getElementById("subjects-title");
@@ -213,7 +215,11 @@ function renderTasks() {
 }
 
 async function startDashboard() {
-  await holidayReady;
+  try {
+    await holidayReady;
+  } catch (error) {
+    console.error(error);
+  }
 
   renderHoliday();
   renderSubjects();

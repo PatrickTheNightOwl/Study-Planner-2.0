@@ -14,6 +14,7 @@ logInForm.addEventListener("submit", function (event) {
     .signInWithEmailAndPassword(email, password)
     .then(() => {
       alert("Logging in succeeded");
+
       const homePage = "../HTML/dashboard.html";
       window.location.replace(homePage);
     })

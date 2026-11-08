@@ -79,6 +79,7 @@ signUpForm.addEventListener("submit", function (event) {
           tasks: [],
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
+        db.collection("users");
       })
       .then(() => {
         alert("Signing up succeeded");

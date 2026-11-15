@@ -1,6 +1,3 @@
-// const subjectsList = currentUser.subjects || [];
-// const tasksList = currentUser.tasks || [];
-
 // const tasksContainer = document.getElementById("tasks-container");
 // const taskSearchInput = document.getElementById("task-search");
 // const addTaskButton = document.getElementById("add-task");

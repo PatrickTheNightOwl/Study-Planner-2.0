@@ -6,7 +6,6 @@ const signUpForm = document.getElementById("form");
 const inputEmail = document.getElementById("input-email");
 const inputPassword = document.getElementById("input-password");
 const switchShowHide = document.getElementById("hidden-switch");
-const userColl = db.collection("users");
 //Function
 function emailFilter(email) {
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -52,10 +51,10 @@ function passwordFilter(password) {
   return true;
 }
 // Functions and Events
-signUpForm.addEventListener("submit", function (event) {
+signUpForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  const email = inputEmail.value;
+  const email = inputEmail.value.trim();
   const password = inputPassword.value;
 
   // Validation
@@ -65,42 +64,37 @@ signUpForm.addEventListener("submit", function (event) {
   if (emailCheck !== true) {
     alert(emailCheck);
     return;
-  } else if (passwordCheck !== true) {
+  }
+
+  if (passwordCheck !== true) {
     alert(passwordCheck);
     return;
-  } else {
-    auth
-      .createUserWithEmailAndPassword(email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        userColl.doc(user.uid).set({
-          email: user.email,
-          subjects: [],
-          tasks: [],
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        });
-        db.collection("users");
-      })
-      .then(() => {
-        alert("Signing up succeeded");
-        const loginPage = "../HTML/authentication-login.html";
-        window.location.replace(loginPage);
-      })
-      .catch((error) => {
-        alert(error.message);
-      });
   }
-});
-switchShowHide.addEventListener("click", () => {
-  if (switchShowHide.getAttribute("mode") == "off") {
-    switchShowHide.style.backgroundImage =
-      "url('../Assets/hide-password-button.jpg')";
-    switchShowHide.setAttribute("mode", "on");
-    inputPassword.setAttribute("type", "text");
-  } else {
-    switchShowHide.style.backgroundImage =
-      "url('../Assets/show-password-button.jpg')";
-    switchShowHide.setAttribute("mode", "off");
-    inputPassword.setAttribute("type", "password");
+
+  try {
+    // 1. Create account
+    const userCredential = await auth.createUserWithEmailAndPassword(
+      email,
+      password
+    );
+
+    const user = userCredential.user;
+
+    // 2. Create user document
+    await db.collection("users").doc(user.uid).set({
+      email: user.email,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+
+    // 3. Sign out before redirecting to Login
+    await auth.signOut();
+
+    // 4. Redirect
+    alert("Signing up succeeded");
+
+    window.location.replace("../HTML/authentication-login.html");
+  } catch (error) {
+    console.error("Sign up error:", error);
+    alert(error.message);
   }
 });

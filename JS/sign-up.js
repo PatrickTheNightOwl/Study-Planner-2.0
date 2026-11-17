@@ -98,3 +98,16 @@ signUpForm.addEventListener("submit", async (event) => {
     alert(error.message);
   }
 });
+switchShowHide.addEventListener("click", () => {
+  if (switchShowHide.getAttribute("mode") == "off") {
+    switchShowHide.style.backgroundImage =
+      "url('../Assets/hide-password-button.jpg')";
+    switchShowHide.setAttribute("mode", "on");
+    inputPassword.setAttribute("type", "text");
+  } else {
+    switchShowHide.style.backgroundImage =
+      "url('../Assets/show-password-button.jpg')";
+    switchShowHide.setAttribute("mode", "off");
+    inputPassword.setAttribute("type", "password");
+  }
+});

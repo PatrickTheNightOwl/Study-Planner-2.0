@@ -78,6 +78,7 @@ renderSubjects();
 resetForm();
 
 addSubjectButton.addEventListener("click", () => {
+  console.log("createsubject");
   subjectModalOverlay.classList.remove("hidden");
   subjectNameInput.focus();
 });

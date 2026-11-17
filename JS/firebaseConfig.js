@@ -13,8 +13,21 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 // functions
+async function getCurrentUserId() {
+  let currentUser = null;
+
+  auth.onAuthStateChanged((user) => {
+    currentUser = user;
+
+    if (currentUser) {
+      return currentUser.uid;
+    } else {
+      console.log("No authenticated user");
+    }
+  });
+}
 async function getUserSubjectsRef() {
-  const currentUserId = await getCurrentUser();
+  const currentUserId = await getCurrentUserId();
   if (!currentUserId) {
     throw new Error("User is not authenticated");
   }
@@ -30,7 +43,7 @@ async function getUserSubjects() {
   return subjects;
 }
 async function getUserTasksRef() {
-  const currentUserId = await getCurrentUser();
+  const currentUserId = await getCurrentUserId();
 
   if (!currentUserId) {
     throw new Error("User is not authenticated");
@@ -47,20 +60,17 @@ async function getUserTasks() {
     ...doc.data(),
   }));
 }
-async function getCurrentUserId() {
-  let currentUser = null;
 
-  auth.onAuthStateChanged((user) => {
-    currentUser = user;
-
-    if (currentUser) {
-      return currentUser.uid;
-    } else {
-      console.log("No authenticated user");
-    }
-  });
+async function defineListAndRef() {
+  const subjectsList = await getUserSubjects();
+  const subjectsRef = await getUserSubjectsRef();
+  const tasksList = await getUserTasks();
+  const tasksRef = await getUserTasksRef();
+  return [subjectsList, subjectsRef, tasksList, tasksRef];
 }
-const subjectsList = await getUserSubjects();
-const subjectsRef = await getUserSubjectsRef();
-const tasksList = await getUserTasks();
-const tasksRef = await getUserTasksRef();
+const ListAndRef = defineListAndRef();
+console.log(ListAndRef);
+const subjectsList = ListAndRef[0];
+const subjectsRef = ListAndRef[1];
+const tasksList = ListAndRef[2];
+const tasksRef = ListAndRef[3];

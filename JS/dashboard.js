@@ -136,7 +136,27 @@ function createTaskCard(task) {
     </article>
   `;
 }
+async function deleteTaskById(id) {
+  // Lấy các task thuộc subject
+  const relatedTasks = await tasksRef.where("taskId", "==", id).get();
 
+  // Tạo batch
+  const batch = db.batch();
+
+  // Xóa các task liên quan
+  relatedTasks.docs.forEach((doc) => {
+    batch.delete(doc.ref);
+  });
+
+  // Commit tất cả
+  await batch.commit();
+
+  for (let i = tasksList.length - 1; i >= 0; i--) {
+    if (tasksList[i].taskId === id) {
+      tasksList.splice(i, 1);
+    }
+  }
+}
 function attachTaskCompletion() {
   document.querySelectorAll(".complete-task-checkbox").forEach((checkbox) => {
     checkbox.addEventListener("change", (event) => {
@@ -150,8 +170,9 @@ function attachTaskCompletion() {
         const finishedTaskIndex = tasksList.findIndex(
           (task) => task.task === taskName
         );
-        if (finishedTaskIndex !== -1) tasksList.splice(finishedTaskIndex, 1);
-        localStorage.setItem("studyPlannerDatabase", JSON.stringify(database));
+        const id = null;
+        if (finishedTaskIndex !== -1) id = tasksList[finishedTaskIndex].taskId;
+        deleteTaskById(id);
         renderSubjects();
         renderTasks();
       }, 240);

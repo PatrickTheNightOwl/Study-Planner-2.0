@@ -18,7 +18,7 @@ function escapeHTML(value) {
 }
 
 function renderSubjects() {
-  if (subjectList.length === 0) {
+  if (subjectsList.length === 0) {
     subjectsContainer.innerHTML = `
       <p class="no-task-notification">
         No subjects yet. Add your first subject to start organizing tasks.
@@ -27,7 +27,7 @@ function renderSubjects() {
     return;
   }
 
-  subjectsContainer.innerHTML = subjectList
+  subjectsContainer.innerHTML = subjectsList
     .map((subject) => {
       const remainingTasks = tasksList.filter(
         (task) => task.subjectId === subject.id
@@ -90,11 +90,41 @@ subjectModalOverlay.addEventListener("click", (event) => {
 async function deleteTask(taskId) {
   await tasksRef.doc(taskId).delete();
 
-  taskList = taskList.filter((task) => task.id !== taskId);
+  tasksList = tasksList.filter((task) => task.id !== taskId);
+}
+async function deleteSubject(subjectId) {
+  // Lấy các task thuộc subject
+  const relatedTasks = await tasksRef.where("subjectId", "==", subjectId).get();
+
+  // Tạo batch
+  const batch = db.batch();
+
+  // Xóa các task liên quan
+  relatedTasks.docs.forEach((doc) => {
+    batch.delete(doc.ref);
+  });
+
+  // Xóa subject
+  batch.delete(subjectsRef.doc(subjectId));
+
+  // Commit tất cả
+  await batch.commit();
+
+  // Cập nhật JS Arrays
+  subjectsList.splice(
+    subjectsList.findIndex((subject) => subject.id === subjectId),
+    1
+  );
+
+  for (let i = tasksList.length - 1; i >= 0; i--) {
+    if (tasksList[i].subjectId === subjectId) {
+      tasksList.splice(i, 1);
+    }
+  }
 }
 deleteSubjectButton.addEventListener("click", () => {
   const name = subjectNameInput.value.trim();
-  const index = subjectList.findIndex(
+  const index = subjectsList.findIndex(
     (subject) => subject.name.toLowerCase() === name.toLowerCase()
   );
 
@@ -108,15 +138,8 @@ deleteSubjectButton.addEventListener("click", () => {
     return;
   }
 
-  const deletedSubjectId = subjectList[index].id;
-  for (let taskIndex = tasksList.length - 1; taskIndex >= 0; taskIndex -= 1) {
-    if (tasksList[taskIndex].subjectId === deletedSubjectId) {
-      tasksList.splice(taskIndex, 1);
-    }
-  }
-  subjectList.splice(index, 1);
-
-  localStorage.setItem("studyPlannerDatabase", JSON.stringify(database));
+  const deletedSubjectId = subjectsList[index].id;
+  deleteSubject(deletedSubjectId);
   renderSubjects();
   resetForm();
   closeModal();
@@ -125,7 +148,7 @@ deleteSubjectButton.addEventListener("click", () => {
 
 async function saveNewSubject(subjectData) {
   const docRef = await subjectsRef.add(subjectData);
-  subjectList.push({
+  subjectsList.push({
     id: docRef.id,
     ...subjectData,
   });
@@ -138,7 +161,7 @@ saveNewSubjectButton.addEventListener("click", () => {
     return;
   }
   if (
-    subjectList.some(
+    subjectsList.some(
       (subject) => subject.name.trim().toLowerCase() === name.toLowerCase()
     )
   ) {
@@ -146,8 +169,8 @@ saveNewSubjectButton.addEventListener("click", () => {
     return;
   }
 
-  const nextId = subjectList.length
-    ? subjectList[subjectList.length - 1].id + 1
+  const nextId = subjectsList.length
+    ? subjectsList[subjectsList.length - 1].id + 1
     : 1;
 
   const newSubject = {

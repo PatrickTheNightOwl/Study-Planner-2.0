@@ -1,250 +1,279 @@
-// const tasksContainer = document.getElementById("tasks-container");
-// const taskSearchInput = document.getElementById("task-search");
-// const addTaskButton = document.getElementById("add-task");
-// const taskModalOverlay = document.getElementById("modal-overlay");
-// const closeModalButton = document.getElementById("cancel-btn");
-// const deleteTaskButton = document.getElementById("del-btn");
-// const saveNewTaskButton = document.getElementById("save-btn");
-// const taskNameInput = document.getElementById("task-name");
-// const subjectSelector = document.getElementById("subject-selector");
-// const deadlineDateSelector = document.getElementById("deadline-date");
-// const deadlineTimeSelector = document.getElementById("deadline-time");
-// const prioritySelector = document.getElementById("priority-selector");
+const tasksContainer = document.getElementById("tasks-container");
+const taskSearchInput = document.getElementById("task-search");
+const addTaskButton = document.getElementById("add-task");
+const taskModalOverlay = document.getElementById("modal-overlay");
+const closeModalButton = document.getElementById("cancel-btn");
+const deleteTaskButton = document.getElementById("del-btn");
+const saveNewTaskButton = document.getElementById("save-btn");
+const taskNameInput = document.getElementById("task-name");
+const subjectSelector = document.getElementById("subject-selector");
+const deadlineDateSelector = document.getElementById("deadline-date");
+const deadlineTimeSelector = document.getElementById("deadline-time");
+const prioritySelector = document.getElementById("priority-selector");
 
-// function escapeHTML(value) {
-//   return String(value)
-//     .replaceAll("&", "&amp;")
-//     .replaceAll("<", "&lt;")
-//     .replaceAll(">", "&gt;")
-//     .replaceAll('"', "&quot;")
-//     .replaceAll("'", "&#039;");
-// }
+function escapeHTML(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
 
-// function formatDate(rawDate) {
-//   return new Date(`${rawDate}T00:00:00`).toLocaleDateString("en-US", {
-//     year: "numeric",
-//     month: "long",
-//     day: "numeric",
-//   });
-// }
+function formatDate(rawDate) {
+  return new Date(`${rawDate}T00:00:00`).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
 
-// function renderSubjectOptions() {
-//   if (subjectsList.length === 0) {
-//     subjectSelector.innerHTML = `
-//       <option value="" disabled selected>No subjects yet. Create a subject first.</option>
-//     `;
-//     return;
-//   }
+function renderSubjectOptions() {
+  if (subjectsList.length === 0) {
+    subjectSelector.innerHTML = `
+      <option value="" disabled selected>No subjects yet. Create a subject first.</option>
+    `;
+    return;
+  }
 
-//   subjectSelector.innerHTML = `
-//     <option value="" disabled selected>Select a subject</option>
-//     ${subjectsList
-//       .map(
-//         (subject) =>
-//           `<option value="${subject.id}">${escapeHTML(subject.name)}</option>`
-//       )
-//       .join("")}
-//   `;
-// }
+  subjectSelector.innerHTML = `
+    <option value="" disabled selected>Select a subject</option>
+    ${subjectsList
+      .map(
+        (subject) =>
+          `<option value="${subject.id}">${escapeHTML(subject.name)}</option>`
+      )
+      .join("")}
+  `;
+}
 
-// function createTaskCard(task) {
-//   const taskName = escapeHTML(task.task);
-//   return `
-//     <article class="task-card priority-${escapeHTML(
-//       task.priority
-//     )}" data-task="${taskName}">
-//       <div class="task-info">
-//         <h3 class="task-title">${taskName}</h3>
-//         <p class="task-deadline">Deadline: ${formatDate(
-//           task.deadlineDate
-//         )}, ${escapeHTML(task.deadlineTime)}</p>
-//       </div>
-//       <input type="checkbox" class="complete-task-checkbox" aria-label="Mark ${taskName} as complete" />
-//     </article>
-//   `;
-// }
+function createTaskCard(task) {
+  const taskName = escapeHTML(task.task);
+  return `
+    <article class="task-card priority-${escapeHTML(
+      task.priority
+    )}" data-task="${taskName}">
+      <div class="task-info">
+        <h3 class="task-title">${taskName}</h3>
+        <p class="task-deadline">Deadline: ${formatDate(
+          task.deadlineDate
+        )}, ${escapeHTML(task.deadlineTime)}</p>
+      </div>
+      <input type="checkbox" class="complete-task-checkbox" aria-label="Mark ${taskName} as complete" />
+    </article>
+  `;
+}
 
-// function getVisibleTasks() {
-//   const query = taskSearchInput.value.trim().toLowerCase();
-//   if (!query) return tasksList;
+function getVisibleTasks() {
+  const query = taskSearchInput.value.trim().toLowerCase();
+  if (!query) return tasksList;
 
-//   return tasksList.filter((item) => {
-//     const taskName = item.task.toLowerCase();
-//     const subject = subjectsList.find((entry) => entry.id === item.subjectId);
-//     const subjectName = subject ? String(subject.name).toLowerCase() : "";
-//     return taskName.includes(query) || subjectName.includes(query);
-//   });
-// }
+  return tasksList.filter((item) => {
+    const taskName = item.task.toLowerCase();
+    const subject = subjectsList.find((entry) => entry.id === item.subjectId);
+    const subjectName = subject ? String(subject.name).toLowerCase() : "";
+    return taskName.includes(query) || subjectName.includes(query);
+  });
+}
+async function deleteTaskById(id) {
+  // Lấy các task thuộc subject
+  const relatedTasks = await tasksRef.where("taskId", "==", id).get();
 
-// function attachTaskCompletion() {
-//   document.querySelectorAll(".complete-task-checkbox").forEach((checkbox) => {
-//     checkbox.addEventListener("change", (event) => {
-//       if (!event.target.checked) return;
+  // Tạo batch
+  const batch = db.batch();
 
-//       const taskCard = event.target.closest(".task-card");
-//       const taskName = taskCard.dataset.task;
-//       taskCard.classList.add("completed");
+  // Xóa các task liên quan
+  relatedTasks.docs.forEach((doc) => {
+    batch.delete(doc.ref);
+  });
 
-//       setTimeout(() => {
-//         const index = tasksList.findIndex((task) => task.task === taskName);
-//         if (index !== -1) tasksList.splice(index, 1);
-//         localStorage.setItem("studyPlannerDatabase", JSON.stringify(database));
-//         renderTasks();
-//       }, 240);
-//     });
-//   });
-// }
+  // Commit tất cả
+  await batch.commit();
 
-// function renderTasks() {
-//   if (tasksList.length === 0) {
-//     tasksContainer.innerHTML = `
-//       <p class="no-task-notification">
-//         No tasks yet. Add one to turn your next study goal into a clear step.
-//       </p>
-//     `;
-//     return;
-//   }
+  for (let i = tasksList.length - 1; i >= 0; i--) {
+    if (tasksList[i].taskId === id) {
+      tasksList.splice(i, 1);
+    }
+  }
+}
+function attachTaskCompletion() {
+  document.querySelectorAll(".complete-task-checkbox").forEach((checkbox) => {
+    checkbox.addEventListener("change", (event) => {
+      if (!event.target.checked) return;
 
-//   const visibleTasks = getVisibleTasks();
-//   if (visibleTasks.length === 0) {
-//     tasksContainer.innerHTML = `
-//       <p class="no-task-notification">
-//         No tasks match your search.
-//       </p>
-//     `;
-//     return;
-//   }
+      const taskCard = event.target.closest(".task-card");
+      const taskName = taskCard.dataset.task;
+      taskCard.classList.add("completed");
 
-//   const groups = [
-//     { key: "high", label: "High priority" },
-//     { key: "medium", label: "Medium priority" },
-//     { key: "low", label: "Low priority" },
-//   ];
+      setTimeout(() => {
+        const index = tasksList.findIndex((task) => task.task === taskName);
+        const id = null;
+        if (index !== -1) id = tasksList[index].taskId;
+        deleteTaskById(id);
+        renderTasks();
+      }, 240);
+    });
+  });
+}
 
-//   tasksContainer.innerHTML = groups
-//     .map((group) => {
-//       const groupTasks = visibleTasks
-//         .filter((task) => task.priority === group.key)
-//         .sort(
-//           (a, b) =>
-//             new Date(`${a.deadlineDate}T${a.deadlineTime}`) -
-//             new Date(`${b.deadlineDate}T${b.deadlineTime}`)
-//         );
+function renderTasks() {
+  if (tasksList.length === 0) {
+    tasksContainer.innerHTML = `
+      <p class="no-task-notification">
+        No tasks yet. Add one to turn your next study goal into a clear step.
+      </p>
+    `;
+    return;
+  }
 
-//       return `
-//         <section class="tasks-group" id="${group.key}-priority">
-//           <div class="task-group-heading">
-//             <span>${group.label}</span>
-//             <span class="task-count">${groupTasks.length || "None"}</span>
-//           </div>
-//           ${groupTasks.map(createTaskCard).join("")}
-//         </section>
-//       `;
-//     })
-//     .join("");
+  const visibleTasks = getVisibleTasks();
+  if (visibleTasks.length === 0) {
+    tasksContainer.innerHTML = `
+      <p class="no-task-notification">
+        No tasks match your search.
+      </p>
+    `;
+    return;
+  }
 
-//   attachTaskCompletion();
-// }
+  const groups = [
+    { key: "high", label: "High priority" },
+    { key: "medium", label: "Medium priority" },
+    { key: "low", label: "Low priority" },
+  ];
 
-// function closeModal() {
-//   taskModalOverlay.classList.add("hidden");
-// }
+  tasksContainer.innerHTML = groups
+    .map((group) => {
+      const groupTasks = visibleTasks
+        .filter((task) => task.priority === group.key)
+        .sort(
+          (a, b) =>
+            new Date(`${a.deadlineDate}T${a.deadlineTime}`) -
+            new Date(`${b.deadlineDate}T${b.deadlineTime}`)
+        );
 
-// function resetForm() {
-//   taskNameInput.value = "";
-//   subjectSelector.value = "";
-//   deadlineDateSelector.value = "";
-//   deadlineTimeSelector.value = "";
-//   prioritySelector.value = "";
-// }
+      return `
+        <section class="tasks-group" id="${group.key}-priority">
+          <div class="task-group-heading">
+            <span>${group.label}</span>
+            <span class="task-count">${groupTasks.length || "None"}</span>
+          </div>
+          ${groupTasks.map(createTaskCard).join("")}
+        </section>
+      `;
+    })
+    .join("");
 
-// renderSubjectOptions();
-// renderTasks();
+  attachTaskCompletion();
+}
 
-// taskSearchInput.addEventListener("input", renderTasks);
+function closeModal() {
+  taskModalOverlay.classList.add("hidden");
+}
 
-// addTaskButton.addEventListener("click", () => {
-//   taskModalOverlay.classList.remove("hidden");
-//   taskNameInput.focus();
-// });
+function resetForm() {
+  taskNameInput.value = "";
+  subjectSelector.value = "";
+  deadlineDateSelector.value = "";
+  deadlineTimeSelector.value = "";
+  prioritySelector.value = "";
+}
 
-// closeModalButton.addEventListener("click", closeModal);
+renderSubjectOptions();
+renderTasks();
 
-// taskModalOverlay.addEventListener("click", (event) => {
-//   if (event.target === taskModalOverlay) closeModal();
-// });
+taskSearchInput.addEventListener("input", renderTasks);
 
-// deleteTaskButton.addEventListener("click", () => {
-//   const taskName = taskNameInput.value.trim();
+addTaskButton.addEventListener("click", () => {
+  taskModalOverlay.classList.remove("hidden");
+  taskNameInput.focus();
+});
 
-//   if (taskName === "") {
-//     alert("Please enter the task name.");
-//     return;
-//   }
+closeModalButton.addEventListener("click", closeModal);
 
-//   const index = tasksList.findIndex(
-//     (task) => task.task.toLowerCase() === taskName.toLowerCase()
-//   );
+taskModalOverlay.addEventListener("click", (event) => {
+  if (event.target === taskModalOverlay) closeModal();
+});
 
-//   if (index === -1) {
-//     alert("No task found. Please check the task name again.");
-//     return;
-//   }
+deleteTaskButton.addEventListener("click", () => {
+  const taskName = taskNameInput.value.trim();
 
-//   tasksList.splice(index, 1);
-//   localStorage.setItem("studyPlannerDatabase", JSON.stringify(database));
-//   renderTasks();
-//   resetForm();
-//   closeModal();
-//   alert("Task deleted.");
-// });
+  if (taskName === "") {
+    alert("Please enter the task name.");
+    return;
+  }
 
-// saveNewTaskButton.addEventListener("click", () => {
-//   const taskName = taskNameInput.value.trim();
-//   const subjectId = Number(subjectSelector.value);
-//   const deadlineDate = deadlineDateSelector.value;
-//   const deadlineTime = deadlineTimeSelector.value;
-//   const priority = prioritySelector.value;
+  const index = tasksList.findIndex(
+    (task) => task.task.toLowerCase() === taskName.toLowerCase()
+  );
 
-//   if (taskName === "") {
-//     alert("Please enter the task name.");
-//     return;
-//   }
-//   if (!subjectSelector.value) {
-//     alert("Please select the task subject.");
-//     return;
-//   }
-//   if (!deadlineDate) {
-//     alert("Please select the task deadline date.");
-//     return;
-//   }
-//   if (!deadlineTime) {
-//     alert("Please select the task deadline time.");
-//     return;
-//   }
-//   if (!priority) {
-//     alert("Please select the task priority.");
-//     return;
-//   }
-//   if (
-//     tasksList.some(
-//       (task) => task.task.toLowerCase().trim() === taskName.toLowerCase()
-//     )
-//   ) {
-//     alert("That task already exists.");
-//     return;
-//   }
+  if (index === -1) {
+    alert("No task found. Please check the task name again.");
+    return;
+  }
 
-//   tasksList.push({
-//     task: taskName,
-//     subjectId,
-//     deadlineDate,
-//     deadlineTime,
-//     priority,
-//   });
-//   localStorage.setItem("studyPlannerDatabase", JSON.stringify(database));
-//   renderTasks();
-//   resetForm();
-//   closeModal();
-//   alert("Task created.");
-// });
+  const id = tasksList[index].taskId;
+  deleteTaskById(id);
+  renderTasks();
+  resetForm();
+  closeModal();
+  alert("Task deleted.");
+});
+async function saveNewTask(taskData) {
+  const docRef = await tasksRef.add(taskData);
+  tasksList.push({
+    id: docRef.id,
+    ...taskData,
+  });
+}
+saveNewTaskButton.addEventListener("click", () => {
+  const taskName = taskNameInput.value.trim();
+  const subjectId = Number(subjectSelector.value);
+  const deadlineDate = deadlineDateSelector.value;
+  const deadlineTime = deadlineTimeSelector.value;
+  const priority = prioritySelector.value;
+
+  if (taskName === "") {
+    alert("Please enter the task name.");
+    return;
+  }
+  if (!subjectSelector.value) {
+    alert("Please select the task subject.");
+    return;
+  }
+  if (!deadlineDate) {
+    alert("Please select the task deadline date.");
+    return;
+  }
+  if (!deadlineTime) {
+    alert("Please select the task deadline time.");
+    return;
+  }
+  if (!priority) {
+    alert("Please select the task priority.");
+    return;
+  }
+  if (
+    tasksList.some(
+      (task) => task.task.toLowerCase().trim() === taskName.toLowerCase()
+    )
+  ) {
+    alert("That task already exists.");
+    return;
+  }
+  const nextId = tasksList.length ? tasksList[tasksList.length - 1].id + 1 : 1;
+
+  taskData = {
+    task: taskName,
+    subjectId: subjectId,
+    taskId: nextId,
+    deadlineDate: deadlineDate,
+    deadlineTime: deadlineTime,
+    priority: priority,
+  };
+  saveNewTask(taskData);
+  renderTasks();
+  resetForm();
+  closeModal();
+  alert("Task created.");
+});

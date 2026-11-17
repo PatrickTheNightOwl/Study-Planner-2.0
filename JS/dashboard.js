@@ -1,8 +1,3 @@
-// currentUser chưa được định nghĩa ở đâu cả -> tránh ReferenceError làm dừng cả file
-const userData = typeof currentUser !== "undefined" ? currentUser : {};
-const subjectsList = userData.subjects || [];
-const tasksList = userData.tasks || [];
-
 const holidaysContainer = document.getElementById("holiday");
 const subjectsTitle = document.getElementById("subjects-title");
 const subjectsContainer = document.getElementById("subjects");

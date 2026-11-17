@@ -60,7 +60,7 @@ async function getCurrentUserId() {
     }
   });
 }
-const subjectList = await getUserSubjects();
+const subjectsList = await getUserSubjects();
 const subjectsRef = await getUserSubjectsRef();
 const tasksList = await getUserTasks();
 const tasksRef = await getUserTasksRef();

@@ -37,6 +37,12 @@ function escapeHTML(value) {
 }
 
 async function renderSubjects() {
+  subjectsContainer.innerHTML = `
+    <p class="loading-notification">
+      <span class="loading-icon">⏳</span>
+      Loading subjects...
+    </p>
+  `;
   await dataReady;
   if (subjectsList.length === 0) {
     subjectsContainer.innerHTML = `

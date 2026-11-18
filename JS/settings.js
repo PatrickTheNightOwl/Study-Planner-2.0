@@ -1,3 +1,4 @@
+import { getCurrentUser } from "./firebaseConfig.js";
 // Elements Retrieve
 const currentEmail = document.getElementById("current-email");
 const changeEmailButton = document.getElementById("change-email-btn");
@@ -10,9 +11,19 @@ const closeModalButton = document.getElementById("cancel-btn");
 const saveNewInfoButton = document.getElementById("save-btn");
 const currentInfomation = document.getElementById("current-information");
 const newInfoInput = document.getElementById("new-info-input");
+
+let currentUserEmail;
+let currentUserPassword;
 // Functions
+const user = await getCurrentUser();
+
+if (user) {
+  currentUserEmail = user.email;
+} else {
+  console.log("No authenticated user");
+}
 function renderInformations() {
-  currentEmail.textContent = `Email: ${currentUser.email}`;
+  currentEmail.textContent = `Email: ${currentUserEmail}`;
   currentPassword.textContent = "Password: hidden";
 }
 function emailFilter(email) {
@@ -66,7 +77,7 @@ renderInformations();
 
 // Add Event Listener
 changeEmailButton.addEventListener("click", () => {
-  currentInfomation.textContent = `Current Email: ${currentUser.email}`;
+  currentInfomation.textContent = `Current Email: ${currentUserEmail}`;
   currentInfomation.dataset.info = "email";
   newInfoInput.type = "email";
   newInfoInput.placeholder = "Enter a new email address";

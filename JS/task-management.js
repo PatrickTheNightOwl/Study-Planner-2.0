@@ -6,17 +6,17 @@ import {
   dataReady,
 } from "./firebaseConfig.js";
 
-async function initializeSubjects() {
+async function initializeTasks() {
   try {
     await dataReady;
 
     renderTasks();
   } catch (error) {
-    console.error("Failed to initialize subjects:", error);
+    console.error("Failed to initialize tasks:", error);
   }
 }
 
-initializeSubjects();
+initializeTasks();
 const tasksContainer = document.getElementById("tasks-container");
 const taskSearchInput = document.getElementById("task-search");
 const addTaskButton = document.getElementById("add-task");
@@ -137,6 +137,12 @@ function attachTaskCompletion() {
 }
 
 async function renderTasks() {
+  tasksContainer.innerHTML = `
+    <p class="loading-notification">
+      <span class="loading-icon">⏳</span>
+      Loading tasks...
+    </p>
+  `;
   await dataReady;
   if (tasksList.length === 0) {
     tasksContainer.innerHTML = `

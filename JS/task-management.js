@@ -1,3 +1,22 @@
+import {
+  subjectsList,
+  subjectsRef,
+  tasksList,
+  tasksRef,
+  dataReady,
+} from "./firebaseConfig.js";
+
+async function initializeSubjects() {
+  try {
+    await dataReady;
+
+    renderTasks();
+  } catch (error) {
+    console.error("Failed to initialize subjects:", error);
+  }
+}
+
+initializeSubjects();
 const tasksContainer = document.getElementById("tasks-container");
 const taskSearchInput = document.getElementById("task-search");
 const addTaskButton = document.getElementById("add-task");
@@ -28,7 +47,8 @@ function formatDate(rawDate) {
   });
 }
 
-function renderSubjectOptions() {
+async function renderSubjectOptions() {
+  await dataReady;
   if (subjectsList.length === 0) {
     subjectSelector.innerHTML = `
       <option value="" disabled selected>No subjects yet. Create a subject first.</option>
@@ -116,7 +136,8 @@ function attachTaskCompletion() {
   });
 }
 
-function renderTasks() {
+async function renderTasks() {
+  await dataReady;
   if (tasksList.length === 0) {
     tasksContainer.innerHTML = `
       <p class="no-task-notification">
@@ -263,7 +284,7 @@ saveNewTaskButton.addEventListener("click", () => {
   }
   const nextId = tasksList.length ? tasksList[tasksList.length - 1].id + 1 : 1;
 
-  taskData = {
+  const taskData = {
     task: taskName,
     subjectId: subjectId,
     taskId: nextId,

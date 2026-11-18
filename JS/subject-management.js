@@ -1,3 +1,22 @@
+import {
+  subjectsList,
+  subjectsRef,
+  tasksList,
+  tasksRef,
+  dataReady,
+} from "./firebaseConfig.js";
+
+async function initializeSubjects() {
+  try {
+    await dataReady;
+
+    renderSubjects();
+  } catch (error) {
+    console.error("Failed to initialize subjects:", error);
+  }
+}
+
+initializeSubjects();
 const subjectsContainer = document.getElementById("subjects-container");
 const addSubjectButton = document.getElementById("add-subject");
 const subjectModalOverlay = document.getElementById("modal-overlay");
@@ -17,7 +36,8 @@ function escapeHTML(value) {
     .replaceAll("'", "&#039;");
 }
 
-function renderSubjects() {
+async function renderSubjects() {
+  await dataReady;
   if (subjectsList.length === 0) {
     subjectsContainer.innerHTML = `
       <p class="no-task-notification">

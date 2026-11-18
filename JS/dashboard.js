@@ -1,3 +1,22 @@
+import {
+  subjectsList,
+  subjectsRef,
+  tasksList,
+  tasksRef,
+  dataReady,
+} from "./firebaseConfig.js";
+
+async function initializeSubjects() {
+  try {
+    await dataReady;
+
+    renderSubjects();
+  } catch (error) {
+    console.error("Failed to initialize subjects:", error);
+  }
+}
+
+initializeSubjects();
 const holidaysContainer = document.getElementById("holiday");
 const subjectsTitle = document.getElementById("subjects-title");
 const subjectsContainer = document.getElementById("subjects");
@@ -88,7 +107,8 @@ function renderHoliday() {
   `;
 }
 
-function renderSubjects() {
+async function renderSubjects() {
+  await dataReady;
   subjectsTitle.hidden = subjectsList.length === 0;
 
   if (subjectsList.length === 0) {
@@ -180,7 +200,8 @@ function attachTaskCompletion() {
   });
 }
 
-function renderTasks() {
+async function renderTasks() {
+  await dataReady;
   const sortedTasks = sortTasksByDeadline();
 
   if (sortedTasks.length === 0) {

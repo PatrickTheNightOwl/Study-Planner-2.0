@@ -13,17 +13,23 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 // functions
-async function getCurrentUserId() {
-  let currentUser = null;
+function getCurrentUserId() {
+  return new Promise((resolve, reject) => {
+    const unsubscribe = auth.onAuthStateChanged(
+      (user) => {
+        unsubscribe();
 
-  auth.onAuthStateChanged((user) => {
-    currentUser = user;
-
-    if (currentUser) {
-      return currentUser.uid;
-    } else {
-      console.log("No authenticated user");
-    }
+        if (user) {
+          resolve(user.uid);
+        } else {
+          reject(new Error("No authenticated user"));
+        }
+      },
+      (error) => {
+        unsubscribe();
+        reject(error);
+      }
+    );
   });
 }
 async function getUserSubjectsRef() {
@@ -44,10 +50,9 @@ async function getUserSubjects() {
 }
 async function getUserTasksRef() {
   const currentUserId = await getCurrentUserId();
-
-  if (!currentUserId) {
-    throw new Error("User is not authenticated");
-  }
+  // if (!currentUserId) {
+  //   throw new Error("User is not authenticated");
+  // }
 
   return db.collection("users").doc(currentUserId).collection("tasks");
 }
@@ -60,17 +65,14 @@ async function getUserTasks() {
     ...doc.data(),
   }));
 }
-
+export let subjectsList = [];
+export let subjectsRef;
+export let tasksList = [];
+export let tasksRef;
 async function defineListAndRef() {
-  const subjectsList = await getUserSubjects();
-  const subjectsRef = await getUserSubjectsRef();
-  const tasksList = await getUserTasks();
-  const tasksRef = await getUserTasksRef();
-  return [subjectsList, subjectsRef, tasksList, tasksRef];
+  subjectsList = await getUserSubjects();
+  subjectsRef = await getUserSubjectsRef();
+  tasksList = await getUserTasks();
+  tasksRef = await getUserTasksRef();
 }
-const ListAndRef = defineListAndRef();
-console.log(ListAndRef);
-const subjectsList = ListAndRef[0];
-const subjectsRef = ListAndRef[1];
-const tasksList = ListAndRef[2];
-const tasksRef = ListAndRef[3];
+export const dataReady = defineListAndRef();

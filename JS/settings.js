@@ -1,4 +1,9 @@
-import { getCurrentUser } from "./firebaseConfig.js";
+import {
+  getCurrentUser,
+  logOut,
+  changeEmail,
+  changePassword,
+} from "./firebaseConfig.js";
 // Elements Retrieve
 const currentEmail = document.getElementById("current-email");
 const changeEmailButton = document.getElementById("change-email-btn");
@@ -19,6 +24,7 @@ const user = await getCurrentUser();
 
 if (user) {
   currentUserEmail = user.email;
+  currentUserPassword = user.password;
 } else {
   console.log("No authenticated user");
 }
@@ -100,7 +106,7 @@ closeModalButton.addEventListener("click", () => {
 modalOverlay.addEventListener("click", (event) => {
   if (event.target === modalOverlay) modalOverlay.classList.add("hidden");
 });
-saveNewInfoButton.addEventListener("click", () => {
+saveNewInfoButton.addEventListener("click", async () => {
   const currentInput = newInfoInput.value;
   if (currentInput.trim().length === 0) {
     if (currentInfomation.dataset.info === "email") {
@@ -116,8 +122,7 @@ saveNewInfoButton.addEventListener("click", () => {
       alert(emailCheck);
       return;
     } else {
-      currentUser.email = currentInput;
-      localStorage.setItem("studyPlannerDatabase", JSON.stringify(database));
+      changeEmail(currentInput, currentUserPassword);
       alert("Email changed!");
       renderInformations();
       modalOverlay.classList.add("hidden");
@@ -129,8 +134,7 @@ saveNewInfoButton.addEventListener("click", () => {
       alert(passwordCheck);
       return;
     } else {
-      currentUser.password = currentInput;
-      localStorage.setItem("studyPlannerDatabase", JSON.stringify(database));
+      changePassword(currentUserPassword, currentInput);
       alert("Password changed!");
       renderInformations();
       modalOverlay.classList.add("hidden");
@@ -138,7 +142,6 @@ saveNewInfoButton.addEventListener("click", () => {
     }
   }
 });
-logOutButton.addEventListener("click", () => {
-  localStorage.removeItem("currentUserId");
-  window.location.replace("index.html");
+logOutButton.addEventListener("click", async () => {
+  await logOut;
 });

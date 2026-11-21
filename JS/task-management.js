@@ -4,8 +4,8 @@ import {
   tasksList,
   tasksRef,
   dataReady,
+  db,
 } from "./firebaseConfig.js";
-
 async function initializeTasks() {
   try {
     await dataReady;
@@ -28,6 +28,7 @@ const taskNameInput = document.getElementById("task-name");
 const subjectSelector = document.getElementById("subject-selector");
 const deadlineDateSelector = document.getElementById("deadline-date");
 const deadlineTimeSelector = document.getElementById("deadline-time");
+const durationSelector = document.getElementById("duration-selector");
 const prioritySelector = document.getElementById("priority-selector");
 
 function escapeHTML(value) {
@@ -78,6 +79,7 @@ function createTaskCard(task) {
         <p class="task-deadline">Deadline: ${formatDate(
           task.deadlineDate
         )}, ${escapeHTML(task.deadlineTime)}</p>
+        <p class="task-deadline">${task.duration} minute</p>
       </div>
       <input type="checkbox" class="complete-task-checkbox" aria-label="Mark ${taskName} as complete" />
     </article>
@@ -96,24 +98,12 @@ function getVisibleTasks() {
   });
 }
 async function deleteTaskById(id) {
-  // Lấy các task thuộc subject
-  const relatedTasks = await tasksRef.where("taskId", "==", id).get();
+  await tasksRef.doc(id).delete();
 
-  // Tạo batch
-  const batch = db.batch();
+  const index = tasksList.findIndex((task) => task.id === id);
 
-  // Xóa các task liên quan
-  relatedTasks.docs.forEach((doc) => {
-    batch.delete(doc.ref);
-  });
-
-  // Commit tất cả
-  await batch.commit();
-
-  for (let i = tasksList.length - 1; i >= 0; i--) {
-    if (tasksList[i].taskId === id) {
-      tasksList.splice(i, 1);
-    }
+  if (index !== -1) {
+    tasksList.splice(index, 1);
   }
 }
 function attachTaskCompletion() {
@@ -125,12 +115,18 @@ function attachTaskCompletion() {
       const taskName = taskCard.dataset.task;
       taskCard.classList.add("completed");
 
-      setTimeout(() => {
-        const index = tasksList.findIndex((task) => task.task === taskName);
-        const id = null;
-        if (index !== -1) id = tasksList[index].taskId;
-        deleteTaskById(id);
-        renderTasks();
+      setTimeout(async () => {
+        const task = tasksList.find((item) => item.task === taskName);
+
+        if (!task) return;
+
+        try {
+          await deleteTaskById(task.id);
+          await renderTasks();
+        } catch (error) {
+          console.error("Failed to complete task:", error);
+          alert("Could not complete task. Please try again.");
+        }
       }, 240);
     });
   });
@@ -249,15 +245,16 @@ deleteTaskButton.addEventListener("click", () => {
 async function saveNewTask(taskData) {
   const docRef = await tasksRef.add(taskData);
   tasksList.push({
-    id: docRef.id,
     ...taskData,
+    id: docRef.id,
   });
 }
-saveNewTaskButton.addEventListener("click", () => {
+saveNewTaskButton.addEventListener("click", async () => {
   const taskName = taskNameInput.value.trim();
   const subjectId = Number(subjectSelector.value);
   const deadlineDate = deadlineDateSelector.value;
   const deadlineTime = deadlineTimeSelector.value;
+  const duration = Number(durationSelector.value);
   const priority = prioritySelector.value;
 
   if (taskName === "") {
@@ -280,6 +277,14 @@ saveNewTaskButton.addEventListener("click", () => {
     alert("Please select the task priority.");
     return;
   }
+  if (!duration) {
+    alert("Please select the task duration");
+    return;
+  }
+  if (!Number.isInteger(duration)) {
+    alert("Float number is not accepted as task duration.");
+    return;
+  }
   if (
     tasksList.some(
       (task) => task.task.toLowerCase().trim() === taskName.toLowerCase()
@@ -288,19 +293,37 @@ saveNewTaskButton.addEventListener("click", () => {
     alert("That task already exists.");
     return;
   }
-  const nextId = tasksList.length ? tasksList[tasksList.length - 1].id + 1 : 1;
-
   const taskData = {
     task: taskName,
     subjectId: subjectId,
-    taskId: nextId,
     deadlineDate: deadlineDate,
     deadlineTime: deadlineTime,
+    duration: duration,
     priority: priority,
   };
-  saveNewTask(taskData);
+  await saveNewTask(taskData);
   renderTasks();
   resetForm();
   closeModal();
   alert("Task created.");
 });
+export async function solveAssistantData(assistantData, newSubjectData) {
+  const subjects = assistantData.subjects;
+  const newTasks = Array();
+  for (const subj of subjects) {
+    for (const task of subj.tasks) {
+      const matchedSubject = newSubjectData.find(
+        (subject) => subject.name === subj.subjectName
+      );
+
+      if (!matchedSubject) {
+        throw new Error(`Subject not found: ${subj.subjectName}`);
+      }
+
+      task.subjectId = matchedSubject.subjectId;
+      newTasks.push(task);
+      await saveNewTask(task);
+    }
+  }
+  return newTasks;
+}

@@ -11,8 +11,19 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
-const db = firebase.firestore();
+export const db = firebase.firestore();
 // functions
+async function logOut() {
+  try {
+    await auth.signOut();
+
+    console.log("Logged out successfully");
+
+    window.location.href = "../HTML/index.html";
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+}
 export function getCurrentUser() {
   return new Promise((resolve, reject) => {
     const unsubscribe = auth.onAuthStateChanged(
@@ -26,6 +37,44 @@ export function getCurrentUser() {
       }
     );
   });
+}
+async function reauthenticateUser(currentPassword) {
+  const user = getCurrentUser();
+
+  if (!user) {
+    throw new Error("No authenticated user");
+  }
+
+  const credential = firebase.auth.EmailAuthProvider.credential(
+    user.email,
+    currentPassword
+  );
+
+  await user.reauthenticateWithCredential(credential);
+
+  return user;
+}
+async function changeEmail(newEmail, currentPassword) {
+  try {
+    const user = await reauthenticateUser(currentPassword);
+
+    await user.verifyBeforeUpdateEmail(newEmail);
+
+    console.log("Verification email sent!");
+  } catch (error) {
+    console.error("Email change failed:", error);
+  }
+}
+async function changePassword(currentPassword, newPassword) {
+  try {
+    const user = await reauthenticateUser(currentPassword);
+
+    await user.updatePassword(newPassword);
+
+    console.log("Password updated successfully!");
+  } catch (error) {
+    console.error("Password update failed:", error);
+  }
 }
 function getCurrentUserId() {
   return new Promise((resolve, reject) => {

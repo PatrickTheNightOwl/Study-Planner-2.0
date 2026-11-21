@@ -4,8 +4,8 @@ import {
   tasksList,
   tasksRef,
   dataReady,
+  db,
 } from "./firebaseConfig.js";
-
 async function initializeSubjects() {
   try {
     await dataReady;
@@ -114,11 +114,6 @@ closeModalButton.addEventListener("click", closeModal);
 subjectModalOverlay.addEventListener("click", (event) => {
   if (event.target === subjectModalOverlay) closeModal();
 });
-async function deleteTask(taskId) {
-  await tasksRef.doc(taskId).delete();
-
-  tasksList = tasksList.filter((task) => task.id !== taskId);
-}
 async function deleteSubject(subjectId) {
   // Lấy các task thuộc subject
   const relatedTasks = await tasksRef.where("subjectId", "==", subjectId).get();
@@ -130,7 +125,7 @@ async function deleteSubject(subjectId) {
   relatedTasks.docs.forEach((doc) => {
     batch.delete(doc.ref);
   });
-
+  console.log("Deleting subject:", subjectId, typeof subjectId);
   // Xóa subject
   batch.delete(subjectsRef.doc(subjectId));
 
@@ -143,13 +138,13 @@ async function deleteSubject(subjectId) {
     1
   );
 
-  for (let i = tasksList.length - 1; i >= 0; i--) {
-    if (tasksList[i].subjectId === subjectId) {
-      tasksList.splice(i, 1);
-    }
-  }
+  tasksList.splice(
+    0,
+    tasksList.length,
+    ...tasksList.filter((task) => task.subjectId !== subjectId)
+  );
 }
-deleteSubjectButton.addEventListener("click", () => {
+deleteSubjectButton.addEventListener("click", async () => {
   const name = subjectNameInput.value.trim();
   const index = subjectsList.findIndex(
     (subject) => subject.name.toLowerCase() === name.toLowerCase()
@@ -166,7 +161,9 @@ deleteSubjectButton.addEventListener("click", () => {
   }
 
   const deletedSubjectId = subjectsList[index].id;
-  deleteSubject(deletedSubjectId);
+  console.log("Subject ID:", deletedSubjectId);
+  console.log("Type:", typeof deletedSubjectId);
+  await deleteSubject(deletedSubjectId);
   renderSubjects();
   resetForm();
   closeModal();
@@ -176,11 +173,12 @@ deleteSubjectButton.addEventListener("click", () => {
 async function saveNewSubject(subjectData) {
   const docRef = await subjectsRef.add(subjectData);
   subjectsList.push({
-    id: docRef.id,
     ...subjectData,
+    id: docRef.id,
   });
+  return docRef.id;
 }
-saveNewSubjectButton.addEventListener("click", () => {
+saveNewSubjectButton.addEventListener("click", async () => {
   const name = subjectNameInput.value.trim();
 
   if (name === "") {
@@ -196,18 +194,44 @@ saveNewSubjectButton.addEventListener("click", () => {
     return;
   }
 
-  const nextId = subjectsList.length
-    ? subjectsList[subjectsList.length - 1].id + 1
-    : 1;
-
   const newSubject = {
-    id: nextId,
     name: name,
     color: selectedColor,
   };
-  saveNewSubject(newSubject);
+  const id = await saveNewSubject(newSubject);
   renderSubjects();
   resetForm();
   closeModal();
   alert("Subject created.");
 });
+
+export async function assistantDataSolver(data) {
+  const subjectsArray = data.subjects;
+  let dataPerSubject = Array();
+  subjectsArray.forEach((subject) => {
+    if (!subject.subjectName) {
+      throw new Error("subjectName not found");
+      return;
+    }
+    if (!subject.colorName) {
+      dataPerSubject.push({
+        name: subject.subjectName,
+        color: "#9ca3af",
+      });
+    } else {
+      dataPerSubject.push({
+        name: subject.subjectName,
+        color: subject.colorName,
+      });
+    }
+  });
+  const newSubjectData = Array();
+  for (const data of dataPerSubject) {
+    let subjectId = await saveNewSubject(data);
+    newSubjectData.push({
+      subjectId: subjectId,
+      ...data,
+    });
+  }
+  return newSubjectData;
+}

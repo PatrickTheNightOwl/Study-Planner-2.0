@@ -108,6 +108,12 @@ function renderHoliday() {
 }
 
 async function renderSubjects() {
+  subjectsContainer.innerHTML = `
+    <p class="loading-notification">
+      <span class="loading-icon">⏳</span>
+      Loading dashboard 
+    </p>
+  `;
   await dataReady;
   subjectsTitle.hidden = subjectsList.length === 0;
 

@@ -41,10 +41,7 @@
           >
         </li>
         <li class="nav-item">
-          <a
-            href="ai-planner2.html"
-            class="nav-link active"
-            aria-current="page"
+          <a href="ai-planner2.html" class="nav-link active" aria-current="page"
             ><span class="nav-icon" aria-hidden="true">&#129302;</span
             ><span>AI Planner</span></a
           >
@@ -62,9 +59,7 @@
       <header id="top">
         <div id="page-title">
           <h1>AI Planner</h1>
-          <p>
-            Describe your week. Review the draft. Approve to add it.
-          </p>
+          <p>Describe your week. Review the draft. Approve to add it.</p>
         </div>
       </header>
 
@@ -98,7 +93,7 @@
               No draft yet. Write a brief and generate a plan to start a
               conversation here.
             </p>
-            <article class="ai-message ai-message-user">
+            <article class="ai-message ai-message-user" id="ai-message">
               <h3>You</h3>
               <p>
                 Plan an exam week for Calculus and History. Two hours on
@@ -107,7 +102,10 @@
             </article>
             <article class="ai-message ai-message-assistant">
               <h3>Planner</h3>
-              <p>Draft ready. Review the proposed subjects and tasks, then approve.</p>
+              <p>
+                Draft ready. Review the proposed subjects and tasks, then
+                approve.
+              </p>
             </article>
           </div>
         </section>
@@ -116,7 +114,7 @@
           <div id="ai-preview-bar">
             <div id="ai-preview-heading">
               <h2>Proposed changes</h2>
-              <p>2 subjects · 5 tasks</p>
+              <p id="subjects-tasks-quantity">2 subjects · 5 tasks</p>
             </div>
             <button id="approve-plan-btn" type="button">Yes, do it</button>
           </div>
@@ -129,17 +127,11 @@
             <section id="proposed-subjects" aria-label="Proposed subjects">
               <h3 class="ai-preview-label">Subjects</h3>
               <div id="subjects">
-                <article
-                  class="subject-card"
-                  style="--subject-color: #3b82f6"
-                >
+                <article class="subject-card" style="--subject-color: #3b82f6">
                   <h3>Calculus</h3>
                   <p>3 remaining tasks</p>
                 </article>
-                <article
-                  class="subject-card"
-                  style="--subject-color: #8b5cf6"
-                >
+                <article class="subject-card" style="--subject-color: #8b5cf6">
                   <h3>History</h3>
                   <p>2 remaining tasks</p>
                 </article>
@@ -185,5 +177,9 @@
         </section>
       </section>
     </main>
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+    <script type="module" src="../JS/chatbot.js"></script>
   </body>
 </html>

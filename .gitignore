@@ -1,4 +1,6 @@
 .env
 holiday.js
 holidays.json
-chatbot.js
+node_modules
+package-lock.json
+package.json

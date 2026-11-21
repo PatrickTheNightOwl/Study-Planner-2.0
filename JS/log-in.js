@@ -1,3 +1,4 @@
+import { auth } from "./firebaseConfig.js";
 // Initialize
 const logInForm = document.getElementById("form");
 const inputEmail = document.getElementById("input-email");

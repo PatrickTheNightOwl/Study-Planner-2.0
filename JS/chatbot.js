@@ -7,7 +7,7 @@ const generateButton = document.getElementById("generate-plan-btn");
 
 const approveButton = document.getElementById("approve-plan-btn");
 
-const userInput = document.getElementById("ai-message");
+const userInput = document.getElementById("ai-prompt");
 
 let approvedPlan = null;
 
@@ -70,12 +70,6 @@ generateButton.addEventListener("click", async () => {
 });
 
 // 3. Duplicate checking
-function isDuplicateSubject(subjectName) {
-  return subjectsList.some(
-    (subject) =>
-      subject.name.trim().toLowerCase() === subjectName.trim().toLowerCase()
-  );
-}
 
 function isDuplicateTask(taskName) {
   return tasksList.some(
@@ -86,13 +80,30 @@ function isDuplicateTask(taskName) {
 // 4. Preview
 function createPreview(data) {
   const container = document.querySelector("#tasks");
+  const subjectsContainer = document.querySelector("#proposed-subjects-list");
 
-  if (!container) {
-    throw new Error("Preview container #tasks not found");
+  if (!container || !subjectsContainer) {
+    throw new Error("Preview containers not found");
   }
 
   container.innerHTML = "";
+  subjectsContainer.innerHTML = "";
 
+  // Render proposed subjects
+  data.subjects.forEach((subject) => {
+    const subjectCard = document.createElement("article");
+
+    subjectCard.classList.add("subject-card");
+    subjectCard.style.setProperty("--subject-color", subject.colorName);
+
+    const subjectTitle = document.createElement("h3");
+    subjectTitle.textContent = subject.subjectName;
+
+    subjectCard.appendChild(subjectTitle);
+    subjectsContainer.appendChild(subjectCard);
+  });
+
+  // Render proposed tasks
   data.subjects.forEach((subject) => {
     const subjectSection = document.createElement("section");
     subjectSection.classList.add("preview-subject");
@@ -120,7 +131,6 @@ function createPreview(data) {
 
       const taskDeadline = document.createElement("p");
       taskDeadline.classList.add("task-deadline");
-
       taskDeadline.textContent = `${task.deadlineDate} · ${task.deadlineTime}`;
 
       taskInfo.append(taskTitle, taskDeadline);
@@ -175,11 +185,6 @@ function validatePlan(data) {
     }
 
     subjectNames.add(normalizedSubject);
-
-    if (isDuplicateSubject(subject.subjectName)) {
-      throw new Error(`Subject already exists: ${subject.subjectName}`);
-    }
-
     if (
       typeof subject.colorName !== "string" ||
       !validColors.includes(subject.colorName.toLowerCase())
@@ -267,6 +272,7 @@ approveButton.addEventListener("click", async () => {
     approvedPlan = null;
 
     alert("Plan approved and saved successfully!");
+    window.location.href = "../HTML/dashboard.html";
   } catch (error) {
     console.error("Plan saving failed:", error);
 

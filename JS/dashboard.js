@@ -148,64 +148,61 @@ async function renderSubjects() {
 
 function createTaskCard(task) {
   const taskName = escapeHTML(task.task);
+
   return `
-    <article class="task-card priority-${escapeHTML(
-      task.priority
-    )}" data-task="${taskName}">
+    <article
+      class="task-card priority-${escapeHTML(task.priority)}"
+      data-task-id="${escapeHTML(task.id)}"
+      data-task="${taskName}"
+    >
       <div class="task-info">
         <h3 class="task-title">${taskName}</h3>
-        <p class="task-deadline">Deadline: ${formatDate(
-          task.deadlineDate
-        )}, ${escapeHTML(task.deadlineTime)}</p>
+        <p class="task-deadline">
+          Deadline: ${formatDate(task.deadlineDate)},
+          ${escapeHTML(task.deadlineTime)}
+        </p>
       </div>
-      <input type="checkbox" class="complete-task-checkbox" aria-label="Mark ${taskName} as complete" />
+
+      <input
+        type="checkbox"
+        class="complete-task-checkbox"
+        aria-label="Mark ${taskName} as complete"
+      />
     </article>
   `;
 }
 async function deleteTaskById(id) {
-  // Lấy các task thuộc subject
-  const relatedTasks = await tasksRef.where("taskId", "==", id).get();
+  try {
+    await tasksRef.doc(id).delete();
 
-  // Tạo batch
-  const batch = db.batch();
+    const taskIndex = tasksList.findIndex((task) => task.id === id);
 
-  // Xóa các task liên quan
-  relatedTasks.docs.forEach((doc) => {
-    batch.delete(doc.ref);
-  });
-
-  // Commit tất cả
-  await batch.commit();
-
-  for (let i = tasksList.length - 1; i >= 0; i--) {
-    if (tasksList[i].taskId === id) {
-      tasksList.splice(i, 1);
+    if (taskIndex !== -1) {
+      tasksList.splice(taskIndex, 1);
     }
+  } catch (error) {
+    console.error("Failed to delete task:", error);
   }
 }
 function attachTaskCompletion() {
   document.querySelectorAll(".complete-task-checkbox").forEach((checkbox) => {
-    checkbox.addEventListener("change", (event) => {
+    checkbox.addEventListener("change", async (event) => {
       if (!event.target.checked) return;
 
       const taskCard = event.target.closest(".task-card");
-      const taskName = taskCard.dataset.task;
+      const taskId = taskCard.dataset.taskId;
+
       taskCard.classList.add("completed");
 
-      setTimeout(() => {
-        const finishedTaskIndex = tasksList.findIndex(
-          (task) => task.task === taskName
-        );
-        const id = null;
-        if (finishedTaskIndex !== -1) id = tasksList[finishedTaskIndex].taskId;
-        deleteTaskById(id);
-        renderSubjects();
-        renderTasks();
+      setTimeout(async () => {
+        await deleteTaskById(taskId);
+
+        await renderSubjects();
+        await renderTasks();
       }, 240);
     });
   });
 }
-
 async function renderTasks() {
   await dataReady;
   const sortedTasks = sortTasksByDeadline();

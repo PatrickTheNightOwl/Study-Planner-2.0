@@ -93,20 +93,6 @@
               No draft yet. Write a brief and generate a plan to start a
               conversation here.
             </p>
-            <article class="ai-message ai-message-user" id="ai-message">
-              <h3>You</h3>
-              <p>
-                Plan an exam week for Calculus and History. Two hours on
-                weeknights, four on Saturday.
-              </p>
-            </article>
-            <article class="ai-message ai-message-assistant">
-              <h3>Planner</h3>
-              <p>
-                Draft ready. Review the proposed subjects and tasks, then
-                approve.
-              </p>
-            </article>
           </div>
         </section>
 
@@ -114,7 +100,6 @@
           <div id="ai-preview-bar">
             <div id="ai-preview-heading">
               <h2>Proposed changes</h2>
-              <p id="subjects-tasks-quantity">2 subjects · 5 tasks</p>
             </div>
             <button id="approve-plan-btn" type="button">Yes, do it</button>
           </div>
@@ -126,7 +111,7 @@
 
             <section id="proposed-subjects" aria-label="Proposed subjects">
               <h3 class="ai-preview-label">Subjects</h3>
-              <div id="subjects">
+              <div id="proposed-subjects-list">
                 <article class="subject-card" style="--subject-color: #3b82f6">
                   <h3>Calculus</h3>
                   <p>3 remaining tasks</p>

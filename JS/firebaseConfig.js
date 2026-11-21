@@ -10,10 +10,10 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 
-const auth = firebase.auth();
+export const auth = firebase.auth();
 export const db = firebase.firestore();
 // functions
-async function logOut() {
+export async function logOut() {
   try {
     await auth.signOut();
 
@@ -39,7 +39,7 @@ export function getCurrentUser() {
   });
 }
 async function reauthenticateUser(currentPassword) {
-  const user = getCurrentUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     throw new Error("No authenticated user");
@@ -54,7 +54,7 @@ async function reauthenticateUser(currentPassword) {
 
   return user;
 }
-async function changeEmail(newEmail, currentPassword) {
+export async function changeEmail(newEmail, currentPassword) {
   try {
     const user = await reauthenticateUser(currentPassword);
 
@@ -65,7 +65,7 @@ async function changeEmail(newEmail, currentPassword) {
     console.error("Email change failed:", error);
   }
 }
-async function changePassword(currentPassword, newPassword) {
+export async function changePassword(currentPassword, newPassword) {
   try {
     const user = await reauthenticateUser(currentPassword);
 

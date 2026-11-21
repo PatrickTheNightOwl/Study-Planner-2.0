@@ -120,7 +120,8 @@ select:focus-visible {
   font-size: 0.9rem;
   font-weight: 600;
   text-decoration: none;
-  transition: background-color 180ms ease, color 180ms ease, transform 180ms ease;
+  transition: background-color 180ms ease, color 180ms ease,
+    transform 180ms ease;
 }
 
 #sidebar .nav-link:hover {
@@ -208,7 +209,8 @@ select:focus-visible {
   font-weight: 750;
   cursor: pointer;
   box-shadow: 0 10px 18px rgba(255, 107, 74, 0.2);
-  transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+  transition: background-color 180ms ease, box-shadow 180ms ease,
+    transform 180ms ease;
 }
 
 #add-subject:hover,
@@ -420,8 +422,8 @@ select:focus-visible {
   background: var(--panel) !important;
   box-shadow: 0 7px 18px rgba(15, 23, 42, 0.035);
   color: var(--ink);
-  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease,
-    opacity 180ms ease;
+  transition: border-color 180ms ease, box-shadow 180ms ease,
+    transform 180ms ease, opacity 180ms ease;
 }
 
 .task-card:hover {
@@ -480,7 +482,8 @@ select:focus-visible {
   background: #ffffff;
   appearance: none;
   cursor: pointer;
-  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+  transition: background 160ms ease, border-color 160ms ease,
+    transform 160ms ease;
 }
 
 .complete-task-checkbox:hover {
@@ -790,7 +793,19 @@ select:focus-visible {
   border-color: var(--accent-dark);
   background: var(--accent-dark);
 }
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+  color: #888;
+}
 
+.error-message {
+  text-align: center;
+  color: #e74c3c;
+  padding: 20px;
+}
 @media (max-width: 860px) {
   #sidebar {
     position: static;

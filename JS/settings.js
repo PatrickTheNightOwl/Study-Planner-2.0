@@ -4,51 +4,90 @@ import {
   changeEmail,
   changePassword,
 } from "./firebaseConfig.js";
-// Elements Retrieve
+
+// ========================================
+// ELEMENTS
+// ========================================
+
 const currentEmail = document.getElementById("current-email");
+const currentPasswordDisplay = document.getElementById("current-password");
+
 const changeEmailButton = document.getElementById("change-email-btn");
-const currentPassword = document.getElementById("current-password");
 const changePasswordButton = document.getElementById("change-password-btn");
 const logOutButton = document.getElementById("logout-btn");
-const modal = document.getElementById("modal");
+
 const modalOverlay = document.getElementById("modal-overlay");
 const closeModalButton = document.getElementById("cancel-btn");
 const saveNewInfoButton = document.getElementById("save-btn");
+
 const currentInfomation = document.getElementById("current-information");
+
 const newInfoInput = document.getElementById("new-info-input");
-
-let currentUserEmail;
-let currentUserPassword;
-// Functions
-const user = await getCurrentUser();
-
-if (user) {
-  currentUserEmail = user.email;
-  currentUserPassword = user.password;
-} else {
-  console.log("No authenticated user");
+const currentPasswordInput = document.getElementById("current-password-input");
+if (
+  !currentEmail ||
+  !currentPasswordDisplay ||
+  !changeEmailButton ||
+  !changePasswordButton ||
+  !logOutButton ||
+  !modalOverlay ||
+  !closeModalButton ||
+  !saveNewInfoButton ||
+  !currentInfomation ||
+  !newInfoInput ||
+  !currentPasswordInput
+) {
+  throw new Error("Settings UI elements not found!");
 }
+// ========================================
+// STATE
+// ========================================
+
+let currentUserEmail = null;
+
+// ========================================
+// INITIALIZATION
+// ========================================
+
+async function initializeSettings() {
+  try {
+    const user = await getCurrentUser();
+
+    if (!user) {
+      console.log("No authenticated user");
+      return;
+    }
+
+    currentUserEmail = user.email;
+
+    renderInformations();
+  } catch (error) {
+    console.error("Failed to initialize settings:", error);
+    alert("Failed to load user information.");
+  }
+}
+
 function renderInformations() {
   currentEmail.textContent = `Email: ${currentUserEmail}`;
-  currentPassword.textContent = "Password: hidden";
+  currentPasswordDisplay.textContent = "Password: hidden";
 }
+
+await initializeSettings();
+
+// ========================================
+// VALIDATION
+// ========================================
+
 function emailFilter(email) {
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  // Regex, giải nghĩa :
-  // Bắt đầu bằng một hoặc nhiều ký tự không phải khoảng trắng/@,
-  // sau đó có @, sau đó có một hoặc nhiều ký tự không phải khoảng trắng/@,
-  // sau đó có dấu chấm,
-  // sau đó có một hoặc nhiều ký tự không phải khoảng trắng/@, và kết thúc chuỗi.
 
   if (!emailPattern.test(email)) {
     return "Please enter a valid email!";
   }
-  const existedUser = database.users.some((user) => user.email === email);
-  if (existedUser) {
-    return "Email already exists!";
-  }
+
   return true;
 }
+
 function passwordFilter(password) {
   const passwordLength = password.length;
 
@@ -79,69 +118,160 @@ function passwordFilter(password) {
 
   return true;
 }
-renderInformations();
 
-// Add Event Listener
-changeEmailButton.addEventListener("click", () => {
-  currentInfomation.textContent = `Current Email: ${currentUserEmail}`;
-  currentInfomation.dataset.info = "email";
-  newInfoInput.type = "email";
-  newInfoInput.placeholder = "Enter a new email address";
+// ========================================
+// MODAL FUNCTIONS
+// ========================================
+
+function openModal(type) {
+  currentInfomation.dataset.info = type;
+
+  currentPasswordInput.classList.remove("hidden");
+  currentPasswordInput.value = "";
+
   newInfoInput.value = "";
+
+  if (type === "email") {
+    currentInfomation.textContent = `Current Email: ${currentUserEmail}`;
+
+    newInfoInput.type = "email";
+    newInfoInput.placeholder = "Enter a new email address";
+  } else {
+    currentInfomation.textContent = "Change your account password";
+
+    newInfoInput.type = "password";
+    newInfoInput.placeholder = "Enter a new password";
+  }
+
   modalOverlay.classList.remove("hidden");
-  newInfoInput.focus();
-});
-changePasswordButton.addEventListener("click", () => {
-  currentInfomation.textContent = "Current Password: hidden";
-  currentInfomation.dataset.info = "password";
-  newInfoInput.type = "password";
-  newInfoInput.placeholder = "Enter a new password";
-  newInfoInput.value = "";
-  modalOverlay.classList.remove("hidden");
-  newInfoInput.focus();
-});
-closeModalButton.addEventListener("click", () => {
+  currentPasswordInput.focus();
+}
+
+function closeModal() {
   modalOverlay.classList.add("hidden");
+
+  currentPasswordInput.value = "";
+  currentPasswordInput.classList.add("hidden");
+
+  newInfoInput.value = "";
+}
+
+// ========================================
+// EVENT LISTENERS
+// ========================================
+
+changeEmailButton.addEventListener("click", () => {
+  openModal("email");
 });
+
+changePasswordButton.addEventListener("click", () => {
+  openModal("password");
+});
+
+closeModalButton.addEventListener("click", closeModal);
+
 modalOverlay.addEventListener("click", (event) => {
-  if (event.target === modalOverlay) modalOverlay.classList.add("hidden");
+  if (event.target === modalOverlay) {
+    closeModal();
+  }
 });
+
+// ========================================
+// SAVE NEW INFORMATION
+// ========================================
+
 saveNewInfoButton.addEventListener("click", async () => {
-  const currentInput = newInfoInput.value;
-  if (currentInput.trim().length === 0) {
-    if (currentInfomation.dataset.info === "email") {
-      alert("Please enter new email address!");
-    } else {
-      alert("Please enter new password!");
-    }
+  const type = currentInfomation.dataset.info;
+
+  const newValue = newInfoInput.value.trim();
+  const currentPassword = currentPasswordInput.value;
+
+  if (!type) {
+    alert("Please select an action first.");
     return;
   }
-  if (currentInfomation.dataset.info === "email") {
-    const emailCheck = emailFilter(currentInput);
-    if (emailCheck !== true) {
-      alert(emailCheck);
-      return;
+
+  if (!currentPassword) {
+    alert("Please enter your current password!");
+    return;
+  }
+
+  if (!newValue) {
+    alert(
+      type === "email"
+        ? "Please enter new email address!"
+        : "Please enter new password!"
+    );
+    return;
+  }
+
+  // Validate new information
+  const validation =
+    type === "email" ? emailFilter(newValue) : passwordFilter(newValue);
+
+  if (validation !== true) {
+    alert(validation);
+    return;
+  }
+
+  try {
+    saveNewInfoButton.disabled = true;
+    saveNewInfoButton.textContent = "Saving...";
+
+    if (type === "email") {
+      await changeEmail(newValue, currentPassword);
+
+      alert(
+        "Verification email sent. Please check your inbox to confirm the new email address."
+      );
     } else {
-      changeEmail(currentInput, currentUserPassword);
-      alert("Email changed!");
-      renderInformations();
-      modalOverlay.classList.add("hidden");
-      newInfoInput.value = "";
+      await changePassword(currentPassword, newValue);
+
+      alert("Password updated successfully!");
     }
-  } else {
-    const passwordCheck = passwordFilter(currentInput);
-    if (passwordCheck !== true) {
-      alert(passwordCheck);
-      return;
+
+    closeModal();
+
+    // Refresh displayed information
+    const user = await getCurrentUser();
+
+    if (user) {
+      currentUserEmail = user.email;
+      renderInformations();
+    }
+  } catch (error) {
+    console.error("Failed to update user information:", error);
+
+    if (
+      error.code === "auth/wrong-password" ||
+      error.code === "auth/invalid-credential"
+    ) {
+      alert("Incorrect current password!");
+    } else if (error.code === "auth/email-already-in-use") {
+      alert("This email is already being used!");
+    } else if (error.code === "auth/invalid-email") {
+      alert("Invalid email address!");
+    } else if (error.code === "auth/weak-password") {
+      alert("Your new password is too weak!");
+    } else if (error.code === "auth/requires-recent-login") {
+      alert("Please log in again before changing your information.");
     } else {
-      changePassword(currentUserPassword, currentInput);
-      alert("Password changed!");
-      renderInformations();
-      modalOverlay.classList.add("hidden");
-      newInfoInput.value = "";
+      alert(error.message || "Something went wrong. Please try again.");
     }
+  } finally {
+    saveNewInfoButton.disabled = false;
+    saveNewInfoButton.textContent = "Save";
   }
 });
+
+// ========================================
+// LOG OUT
+// ========================================
+
 logOutButton.addEventListener("click", async () => {
-  await logOut;
+  try {
+    await logOut();
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
 });

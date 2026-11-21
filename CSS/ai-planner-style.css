@@ -273,7 +273,11 @@
 #proposed-tasks #tasks {
   gap: 10px;
 }
-
+#proposed-subjects-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
 @media (max-width: 900px) {
   #ai-workspace {
     grid-template-columns: 1fr;

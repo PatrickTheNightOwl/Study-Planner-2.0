@@ -83,8 +83,16 @@
         aria-modal="true"
         aria-labelledby="current-information"
       >
-        <div class="informations">
-          <h1 id="current-information"></h1>
+        <div class="informations" id="current-information-container">
+          <p id="current-information"></p>
+
+          <input
+            type="password"
+            id="current-password-input"
+            placeholder="Enter your current password"
+            autocomplete="current-password"
+            class="hidden"
+          />
         </div>
         <input
           type="text"

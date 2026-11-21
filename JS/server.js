@@ -79,7 +79,12 @@ const responseSchema = {
   },
   required: ["subjects"],
 };
-
+const today =
+  new Date()
+    .toLocaleString("sv-SE", {
+      timeZone: "Asia/Ho_Chi_Minh",
+    })
+    .replace(" ", "T") + "+07:00";
 // 4. System instruction
 const systemInstruction = `
 You are a study planning assistant.
@@ -109,7 +114,11 @@ DEADLINE RULES:
 - Follow the provided date and time formats.
 - Never assign a task a deadline later than its applicable overall deadline.
 - Never invent deadlines when the user has not provided enough information.
-
+Today's date is ${today}.
+- All generated deadlines must be on or after today's date.
+- Use YYYY-MM-DD format.
+- Never assume a historical year.
+- Never assign more than one task the same deadline
 DURATION ALLOCATION:
 - Understand the total study time available to the user.
 - Distribute task durations according to the user's priorities and workload.
